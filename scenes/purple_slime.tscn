@@ -1,0 +1,108 @@
+[gd_scene load_steps=13 format=3 uid="uid://d3jlgvn6amuxe"]
+
+[ext_resource type="Script" uid="uid://bw4rq6pmhwqvi" path="res://scripts/purple_slime_movement.gd" id="1_o0hry"]
+[ext_resource type="Texture2D" uid="uid://nlbqcu76to6r" path="res://assets/sprites/slime_purple.png" id="1_rwesy"]
+[ext_resource type="PackedScene" uid="uid://dwnesn4v4ue4p" path="res://scenes/killzone.tscn" id="2_p4tba"]
+[ext_resource type="AudioStream" uid="uid://cibxkixgvs7yi" path="res://assets/sounds/hurt.wav" id="4_o0hry"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bf0kl"]
+atlas = ExtResource("1_rwesy")
+region = Rect2(48, 48, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o0hry"]
+atlas = ExtResource("1_rwesy")
+region = Rect2(0, 24, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_818gd"]
+atlas = ExtResource("1_rwesy")
+region = Rect2(24, 24, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p467k"]
+atlas = ExtResource("1_rwesy")
+region = Rect2(48, 24, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5vw4l"]
+atlas = ExtResource("1_rwesy")
+region = Rect2(72, 24, 24, 24)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_kw5n6"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bf0kl")
+}],
+"loop": true,
+"name": &"death",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o0hry")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_818gd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p467k")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5vw4l")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_818gd"]
+size = Vector2(10, 3)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4btqv"]
+size = Vector2(14, 5)
+
+[node name="PurpleSlime" type="Node2D"]
+script = ExtResource("1_o0hry")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_kw5n6")
+animation = &"death"
+autoplay = "default"
+
+[node name="DeathArea" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DeathArea"]
+position = Vector2(0, 1)
+shape = SubResource("RectangleShape2D_818gd")
+
+[node name="RayCastLeft" type="RayCast2D" parent="."]
+position = Vector2(0, 6)
+exclude_parent = false
+target_position = Vector2(-7, 0)
+collision_mask = 16
+
+[node name="RayCastRight" type="RayCast2D" parent="."]
+position = Vector2(0, 6)
+exclude_parent = false
+target_position = Vector2(7, 0)
+collision_mask = 16
+
+[node name="Killzone" parent="." instance=ExtResource("2_p4tba")]
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Killzone"]
+position = Vector2(0, 9.5)
+shape = SubResource("RectangleShape2D_4btqv")
+
+[node name="DeathSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("4_o0hry")
+pitch_scale = 0.06
+attenuation = 1.8025
+bus = &"SFX"
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.326
+one_shot = true
+
+[connection signal="body_entered" from="DeathArea" to="." method="_on_death_area_body_entered"]
+[connection signal="body_entered" from="DeathArea" to="DeathArea" method="_on_body_entered"]
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
